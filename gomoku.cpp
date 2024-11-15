@@ -400,10 +400,10 @@ namespace asd_mvv
                }
             }
 
-            std::system("cls");
+            /*std::system("cls");
 
             std::cout << "\nТекущее состояние игрового поля:\n";
-            print_Field();
+            print_Field();*/
 
             field[cur_pos.row][cur_pos.col] = EMPTY;                                   // Отменить ход
          }
@@ -414,7 +414,7 @@ namespace asd_mvv
    
    void Gomoku::findBestMove()
    {
-      Coords BestMove = minimax(2, 2, INT_MIN, INT_MAX, true).coords;
+      Coords BestMove = minimax(3, 3, INT_MIN, INT_MAX, true).coords;
 
       if (BestMove.col != -1 && BestMove.row != -1)                     // Устанавливаем лучший ход на поле
       {
@@ -481,99 +481,3 @@ namespace asd_mvv
    }
 }
 
-/*
-int Gomoku::minimax(int depth, int alpha, int beta, bool isMaximizingPlayer)
-{
-   int score = Evaluation();                                     // Оценка текущего состояние доски
-
-   if (depth == 0 || score > 5000000 || score < -5000000)       // нет смысла смотреть глубже
-   {
-      return score;
-   }
-
-   int bestValue = 0;
-   CellState currentPlayer = EMPTY;
-
-   if (isMaximizingPlayer)
-   {
-      currentPlayer = COMPUTER;
-      bestValue = INT_MIN;
-   }
-   else
-   {
-      currentPlayer = PLAYER;
-      bestValue = INT_MAX;
-   }
-
-   for (const Coords& pos : spiral_Order)
-   {
-      if (field[pos.row][pos.col] == 0 && checkSurroundingPieces(pos.row, pos.col))                                    // Проверка на пустую клетку
-      {
-         field[pos.row][pos.col] = currentPlayer;                          // Возможный ход 
-         if (isMaximizingPlayer)
-         {
-            bestValue = std::max(bestValue, minimax(depth - 1, alpha, beta, false));
-            alpha = std::max(alpha, bestValue);                            // Обновить alpha
-         }
-         else
-         {
-            bestValue = std::min(bestValue, minimax(depth - 1, alpha, beta, true));
-            beta = std::min(beta, bestValue);                              // Обновить beta
-            if (beta <= alpha)
-            {
-               field[pos.row][pos.col] = EMPTY;                            // Отменить ход
-               return bestValue;                                           // Отсечение           
-            }
-         }
-         field[pos.row][pos.col] = EMPTY;                                  // Отменить ход
-      }
-   }
-   return bestValue;
-}*/
-
-/*
-int Gomoku::findBestMove()
-{
-   int bestValue = INT_MIN;
-   int moveValue = INT_MIN;
-   int bestMoveRow = -1;
-   int bestMoveCol = -1;
-
-   for (const Coords& pos : spiral_Order)
-   {
-      if (field[pos.row][pos.col] == EMPTY && checkSurroundingPieces(pos.row, pos.col))  // Проверка на пустую клетку
-      {
-         field[pos.row][pos.col] = COMPUTER;                                // Компьютер проверяет свои возможные ходы
-
-         int score = Evaluation();                                     // Оценка текущего состояние доски
-         if (score < 5000000)       // нет смысла смотреть глубже
-         {
-            moveValue = minimax(2, INT_MIN, INT_MAX, false);
-         }
-         else
-         {
-            bestMoveRow = pos.row;
-            bestMoveCol = pos.col;
-            field[pos.row][pos.col] = EMPTY;
-            break;
-         }
-
-         field[pos.row][pos.col] = EMPTY;                                   // Отменить ход
-         if (moveValue > bestValue)
-         {
-            bestMoveRow = pos.row;
-            bestMoveCol = pos.col;
-            bestValue = moveValue;
-         }
-      }
-   }
-
-   if (bestMoveRow != -1 && bestMoveCol != -1)                     // Устанавливаем лучший ход на поле
-   {
-      set_Piece(bestMoveRow, bestMoveCol, 2);
-      std::cout << "Компьютер делает ход: (" << bestMoveRow << ", " << bestMoveCol << ")\n";
-   }
-
-   return bestValue;
-}
-*/
