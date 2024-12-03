@@ -10,7 +10,6 @@ namespace asd_mvv
          {
             field[i][j] = player;
             occupied_Coords.push_back(Coords{ i ,j });
-            std::cout << "Фишка игрока " << player << " установлена на (" << i << ", " << j << ")\n";
          }
          else
          {
@@ -323,9 +322,9 @@ namespace asd_mvv
       }
    }
 
-   bool Gomoku::checkSurroundingPieces(int row, int col)
+   bool Gomoku::checkSurroundingPieces(int row, int col)    // ходы в опр-м радиусе от установленных фишек
    {
-      int distance = 3;
+      int distance = 2;
       for (Coords k : occupied_Coords)
       {
          if (std::abs(row - k.row) < distance && std::abs(col - k.col) < distance)
@@ -336,7 +335,7 @@ namespace asd_mvv
       return false;
    }
 
-   bestValue Gomoku::minimax(int depth, int start_depth, int alpha, int beta, bool isMaximizingPlayer)
+   bestValue Gomoku::Mini_Max(int depth, int start_depth, int alpha, int beta, bool isMaximizingPlayer)
    {
       bestValue Best_Value{ Coords{-1, -1}, 0 };
       CellState currentPlayer = EMPTY;
@@ -354,49 +353,52 @@ namespace asd_mvv
 
       for (const Coords& cur_pos : spiral_Order)
       {
-         if (field[cur_pos.row][cur_pos.col] == 0 && checkSurroundingPieces(cur_pos.row, cur_pos.col))                                    // Проверка на пустую клетку
+         if (field[cur_pos.row][cur_pos.col] == 0 && 
+            checkSurroundingPieces(cur_pos.row, cur_pos.col))         // Проверка на пустую клетку
          {
-            field[cur_pos.row][cur_pos.col] = currentPlayer;                           // Возможный ход 
+            field[cur_pos.row][cur_pos.col] = currentPlayer;          // Возможный ход 
 
-            int score = Evaluation();                                                  // Оценка текущего состояние доски
+            int score = Evaluation();                                 // Оценка текущего состояние доски
             
-            if (depth == 0 || score > 5000000 || score < -5000000)                     // выигрыш или проигрыш или макс глубина
+            if (depth == 0 || score > 5000000 || score < -5000000)    // выигрыш или проигрыш или макс глубина
             {
-               field[cur_pos.row][cur_pos.col] = EMPTY;                             // Отменить ход
+               field[cur_pos.row][cur_pos.col] = EMPTY;               // Отменить ход
                return bestValue{ cur_pos, score };
             }
 
             if (isMaximizingPlayer)
             {
-               if (score > 5000000 && depth == start_depth)                            // выигрыш на первом ходу, возвращает координаты
+               if (score > 5000000 && depth == start_depth)           // выигрыш на первом ходу, возвращает координаты
                {
-                  field[cur_pos.row][cur_pos.col] = EMPTY;                             // Отменить ход
+                  field[cur_pos.row][cur_pos.col] = EMPTY;            // Отменить ход
                   return bestValue{ cur_pos, score };
                }
 
-               bestValue new_Value = std::max( Best_Value, minimax(depth - 1, start_depth, alpha, beta, false));
+               bestValue new_Value = std::max( Best_Value, 
+                  Mini_Max(depth - 1, start_depth, alpha, beta, false));
                if (new_Value != Best_Value)
                {
                   Best_Value = new_Value;
                   Best_Value.coords = cur_pos;
                }
 
-               alpha = std::max(alpha, Best_Value.value);                               // Обновить alpha
+               alpha = std::max(alpha, Best_Value.value);              // Обновить alpha
             }
             else
             {
-               bestValue new_Value = std::min(Best_Value, minimax(depth - 1, start_depth, alpha, beta, true));
+               bestValue new_Value = std::min(Best_Value, 
+                  Mini_Max(depth - 1, start_depth, alpha, beta, true));
                if (new_Value != Best_Value)
                {
                   Best_Value = new_Value;
                   Best_Value.coords = cur_pos;
                }
-               beta = std::min(beta, Best_Value.value);                                 // Обновить beta
+               beta = std::min(beta, Best_Value.value);                // Обновить beta
                
                if (beta <= alpha)
                {
-                  field[cur_pos.row][cur_pos.col] = EMPTY;                             // Отменить ход
-                  return Best_Value;                                                    // Отсечение           
+                  field[cur_pos.row][cur_pos.col] = EMPTY;             // Отменить ход
+                  return Best_Value;                                   // Отсечение           
                }
             }
 
@@ -405,29 +407,28 @@ namespace asd_mvv
             std::cout << "\nТекущее состояние игрового поля:\n";
             print_Field();*/
 
-            field[cur_pos.row][cur_pos.col] = EMPTY;                                   // Отменить ход
+            field[cur_pos.row][cur_pos.col] = EMPTY;                   // Отменить ход
          }
       }
       return Best_Value;
    }
 
-   
-   void Gomoku::findBestMove()
+   Coords Gomoku::findBestMove()
    {
-      Coords BestMove = minimax(3, 3, INT_MIN, INT_MAX, true).coords;
+      int depth = 4;
+      Coords BestMove = Mini_Max(depth, depth, INT_MIN, INT_MAX, true).coords;
 
-      if (BestMove.col != -1 && BestMove.row != -1)                     // Устанавливаем лучший ход на поле
+      if (BestMove.col != -1 && BestMove.row != -1)          // Устанавливаем лучший ход на поле
       {
          set_Piece(BestMove.row, BestMove.col, COMPUTER);
-         std::cout << "Компьютер делает ход: (" << BestMove.row << ", " << BestMove.col<< ")\n";
       }
       else
       {
          std::cout << "Ошибка вычисления лучшего хода" << std::endl;
       }
+      return BestMove;
    }
    
-
    void Gomoku::generateSpiralOrder(int fieldSize)
    {
       int left = 0, right = fieldSize - 1;
@@ -436,7 +437,7 @@ namespace asd_mvv
       while (left <= right && top <= bottom) 
       {
          
-         for (int i = left; i <= right; i++)                              // Верхний ряд
+         for (int i = left; i <= right; i++)                   // Верхний ряд
          {
             if (field[top][i] == 0)
             {
@@ -445,7 +446,7 @@ namespace asd_mvv
          }
          top++;
         
-         for (int i = top; i <= bottom; i++)                              // Правый столбец
+         for (int i = top; i <= bottom; i++)                   // Правый столбец
          {
             if (field[i][right] == 0)
             {
@@ -454,7 +455,7 @@ namespace asd_mvv
          }
          right--;
          
-         if (top <= bottom)                                               // Нижний ряд (если ещё не обошли)
+         if (top <= bottom)                                    // Нижний ряд (если ещё не обошли)
          {
             for (int i = right; i >= left; i--) 
             {
@@ -466,7 +467,7 @@ namespace asd_mvv
             bottom--;
          }
          
-         if (left <= right)                                               // Левый столбец (если ещё не обошли)
+         if (left <= right)                                    // Левый столбец (если ещё не обошли)
          {
             for (int i = bottom; i >= top; i--) 
             {
@@ -480,4 +481,3 @@ namespace asd_mvv
       }
    }
 }
-

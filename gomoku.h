@@ -51,12 +51,9 @@ namespace asd_mvv
       void set_Piece(int i, int j, int player); // Метод для установки фишки на поле
       void print_Field() const;                 // Метод для отображения поля на экране                   
       int Evaluation() const;                   // Оценочная функция
-      // int minimax(int depth, int alpha, int beta, bool isMaximizingPlayer);    // Минимакс функция
-      // int findBestMove();                       // Функция для нахождения лучшего хода
-
-      bestValue minimax(int depth, int start_depth,
+      bestValue Mini_Max(int depth, int start_depth,
          int alpha, int beta, bool isMaximizingPlayer);    // Минимакс функция
-      void findBestMove();                       // Функция для нахождения лучшего хода
+      Coords findBestMove();                       // Функция для нахождения лучшего хода
 
       void generateSpiralOrder(int fieldSize);
 
